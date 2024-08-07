@@ -1,4 +1,5 @@
 <section>
+
     <!-- login and register form -->
     <div class="float-center w-full bg-orange-50 flex justify-center">
         <div class="m-6 my-20 p-10 flex justify-center w-[60%] bg-gray-100 rounded">
