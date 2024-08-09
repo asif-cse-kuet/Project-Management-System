@@ -12,8 +12,9 @@
 
 <body class="bg-gray-100">
 
+    @if(session()->has('user'))
     <!-- Navbar -->
-    <x-nav user="User Mode" />
+    <x-nav userMode="User Mode" />
 
     <!-- Main Content -->
     <div class="container mt-6 w-auto mx-10">
@@ -191,6 +192,20 @@
         </div>
     </div>
 
+
+    <!--Logout for invalid session id -->
+    <form id="logout-form" action="{{route('logout')}}" method="POST" style="display: none;">
+        @csrf
+    </form>
+    @else
+    <!-- If the session variable 'user' is not set, submit the logout form -->
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+        @csrf
+    </form>
+    <script type="text/javascript">
+        document.getElementById('logout-form').submit();
+    </script>
+    @endif
 </body>
 
 

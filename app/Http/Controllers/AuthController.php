@@ -31,13 +31,13 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             // Authentication passed, retrieve the user's role
-            $role = Auth::user()->role;
-
+            $user = Auth::user();
+            $request->session()->regenerateToken();
             // Redirect to the appropriate dashboard based on the role
-            if ($role === 'admin') {
-                return redirect()->intended('AdminDashboard');
-            } elseif ($role === 'user') {
-                return redirect()->intended('UserDashboard');
+            if ($user->role === 'admin') {
+                return redirect()->intended('AdminDashboard')->with('user', $user);
+            } elseif ($user->role === 'user') {
+                return redirect()->intended('UserDashboard')->with('user', $user);
             }
         }
 
