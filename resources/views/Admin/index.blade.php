@@ -12,11 +12,11 @@
 
 <body class="bg-gray-100">
 
-
     @if(session()->has('user'))
 
     <!-- Navbar -->
     <x-nav userMode="Admin Mode" />
+    <div id="success-message" class="hidden bg-green-100 text-green-700 p-2 mb-4 rounded"></div>
 
     <!-- Main Content -->
     <div class="container mt-6 w-auto mx-10">
@@ -43,7 +43,7 @@
     <!-- Projects and Tasks List -->
     <div>
         <!-- Example Project -->
-        <div class="bg-white p-4 rounded-md shadow mb-4 mx-10">
+        <div id="projects-list" class="bg-white p-4 rounded-md shadow mb-4 mx-10">
             <div class="flex justify-between items-center">
                 <div class="text-xl font-bold">Project 1</div>
 
@@ -86,16 +86,30 @@
     <div id="createProjectModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
         <div class="bg-white p-6 rounded-md shadow-md w-full max-w-md">
             <h2 class="text-xl font-bold mb-4">Create New Project</h2>
-            <form>
+            <form id="project-form">
+                @csrf
                 <div class="mb-4">
                     <label class="block mb-1 font-bold">Project Name</label>
-                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
+                    <input type="text" id="create-project-name" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1 font-bold">Description</label>
+                    <input type="text" id="create-project-description" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1 font-bold">Status</label>
+                    <select id="create-project-status" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
+                        <option>Select Status</option>
+                        <option value="new">New</option>
+                        <option value="in_progress">Processing</option>
+                        <option value="completed">Done</option>
+                    </select>
                 </div>
                 <div class="flex justify-end">
                     <button type="button" class="bg-red-500 text-white px-4 py-2 rounded-md shadow mr-2" onclick="document.getElementById('createProjectModal').classList.add('hidden')">
                         Cancel
                     </button>
-                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow">Create</button>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow" onclick="createProject(event)">Create</button>
                 </div>
             </form>
         </div>
@@ -208,6 +222,57 @@
         document.getElementById('logout-form').submit();
     </script>
     @endif
+
+
+
+    <script type="text/javascript">
+        function createProject(event) {
+            event.preventDefault();
+            fetch('{{ route("projects.store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        name: document.getElementById('create-project-name').value,
+                        description: document.getElementById('create-project-description').value,
+                        status: document.getElementById('create-project-status').value
+                    })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        // Handle non-200 responses
+                        return response.json().then(errorData => {
+                            throw new Error('Server Error');
+                        });
+                    }
+                })
+                .then(data => {
+
+                    if (data.success) {
+                        const successMessage = document.getElementById('success-message');
+                        successMessage.textContent = data.message;
+                        successMessage.classList.remove('hidden');
+
+                        // Hide the message after 3 seconds
+                        setTimeout(() => {
+                            successMessage.classList.add('hidden');
+                        }, 3000);
+
+                        document.getElementById('createProjectModal').classList.add('hidden');
+                        document.getElementById('project-form').reset();
+                    }
+                })
+                .catch(error => {
+                    // Handle the error
+                    alert('Something went wrong. Please try again.');
+                    console.error('Error:', error); // Log the error for debugging
+                });
+        }
+    </script>
 </body>
 
 

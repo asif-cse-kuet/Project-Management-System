@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProjectController;
 
 Route::get('/', function () {
     return view('layout.index');
@@ -22,4 +23,6 @@ Route::middleware('auth')->group(function () {
     Route::get('UserDashboard', function () {
         return view('user.index');
     });
+
+    Route::post('/project', [ProjectController::class, 'store'])->name('projects.store');
 });
