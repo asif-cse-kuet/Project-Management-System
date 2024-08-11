@@ -12,19 +12,34 @@ class ProjectController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $projects = Project::all();
-        return view('projects.index', compact('projects'));
+        $search = $request->input('search');
+        $userId = Auth::user()->id;
+        // $userId = "2";
+
+        if ($search) {
+            $projects = Project::where('user_id', $userId)
+                ->where('name', 'like', '%' . $search . '%')
+                ->with('tasks')  // Eager load tasks
+                //->where('name', 'like', '%' . $search . '%')
+                ->latest()->get();
+        } else {
+            $projects = Project::where('user_id', $userId)
+                ->with('tasks')  // Eager load tasks
+                ->latest()->get();
+        }
+
+
+        if ($request->ajax()) {
+            return view('components.project_list', compact('projects'))->render();
+        }
+
+        // return view('components.project_list', compact('projects'))->render();
+        return view('admin.index', compact('projects'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('projects.create');
-    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -50,22 +65,6 @@ class ProjectController extends Controller
             // 'project' => $request,
             // 'user' => Auth::user()
         ]);
-
-        // if (Auth::user()->role === 'admin') {
-        //     return response()->json([
-        //         'success' => true,
-        //         'message' => 'Project created successfully!',
-        //         // 'project' => $request,
-        //         // 'user' => Auth::user()
-        //     ]);
-        // } elseif (Auth::user() === 'user') {
-        //     return response()->json([
-        //         'success' => true,
-        //         'message' => 'Project created successfully!',
-        //         // 'project' => $request,
-        //         // 'user' => Auth::user()
-        //     ]);
-        // }
     }
     /**
      * Display the specified resource.
@@ -75,34 +74,48 @@ class ProjectController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Project $project)
-    {
-        return view('projects.edit', compact('project'));
-    }
 
-    public function update(Request $request, Project $project)
+    public function update(Request $request, $id)
     {
+        $project = Project::findOrFail($id);
+
+
+
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'status' => 'nullable|string'
         ]);
 
-        $project->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'status' => $request->status,
-        ]);
 
-        return redirect()->route('projects.index')->with('success', 'Project updated successfully.');
+        if ($project->user_id === Auth::user()->id) {
+            // Update the project details
+            $project->update([
+                'name' => $request->name,
+                'description' => $request->description,
+                'status' => $request->status
+            ]);
+
+            // Return a JSON response indicating success
+            return response()->json(['success' => true]);
+        }
+
+        // Return a JSON response indicating failure
+        return response()->json(['success' => false], 403);
     }
 
-    public function destroy(Project $project)
+    public function destroy(Request $request)
     {
-        $project->delete();
+        $id = $request->header('Project-ID'); // Retrieve project ID from the headers
+        $project = Project::findOrFail($id);
 
-        return redirect()->route('projects.index')->with('success', 'Project deleted successfully.');
+        // Ensure that the user owns the project
+        if ($project->user_id === Auth::user()->id) {
+            $project->delete();
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false], 403);
+        // return redirect()->route('projects.index')->with('success', 'Project deleted successfully.');
     }
 }

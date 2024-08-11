@@ -16,17 +16,14 @@
 
     <!-- Navbar -->
     <x-nav userMode="Admin Mode" />
-    <div id="success-message" class="hidden bg-green-100 text-green-700 p-2 mb-4 rounded"></div>
+    <div id="success-message" class="hidden bg-green-100 text-blue-700 p-2 mb-4 rounded"></div>
 
     <!-- Main Content -->
     <div class="container mt-6 w-auto mx-10">
         <!-- Search Bar -->
         <div class="flex justify-between items-center mb-6">
             <div class="w-full md:w-2/3">
-                <input type="text" placeholder="Search projects, tasks, users..." class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
-            </div>
-            <div class="ml-4">
-                <button class="bg-green-500 text-white px-4 py-2 rounded-md shadow">Search</button>
+                <input type="search" id="search" placeholder="Search projects, tasks, users..." class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200" onclick="search()">
             </div>
         </div>
 
@@ -36,46 +33,6 @@
                 <button class="bg-blue-500 text-white px-4 py-2 rounded-md shadow" onclick="document.getElementById('createProjectModal').classList.remove('hidden')">
                     Create New Project
                 </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Projects and Tasks List -->
-    <div>
-        <!-- Example Project -->
-        <div id="projects-list" class="bg-white p-4 rounded-md shadow mb-4 mx-10">
-            <div class="flex justify-between items-center">
-                <div class="text-xl font-bold">Project 1</div>
-
-                <div class="flex items-center">
-                    <p class="bg-orange-200 text-black px-2 py-1 rounded-md mr-2">Status</p>
-                    <button class="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2" onclick="document.getElementById('editProjectModal').classList.remove('hidden')">
-                        Edit
-                    </button>
-
-                    <button class="bg-red-500 text-white px-2 py-1 mr-2 rounded-md">Delete</button>
-
-                </div>
-            </div>
-            <div class="mt-4">
-                <button class="bg-green-500 text-white px-4 py-2 rounded-md shadow" onclick="document.getElementById('createTaskModal').classList.remove('hidden')">
-                    Create Task
-                </button>
-                <ul class="list-disc pl-5 mt-4">
-                    <li class="mb-2 flex justify-left items-center max-w-4/5 w-4/5">
-                        <span>Task 1 (Assigned to User A)</span>
-                        <div class="flex items-center space-x-2">
-                            <!-- Status Icon -->
-                            <p class="bg-gray-200 text-blue-900 px-2 py-0 rounded-md ml-4 mr-2">Status</p>
-
-                            <!-- Edit Icon -->
-                            <i class="fas fa-edit cursor-pointer text-yellow-500" title="Edit Task" onclick="document.getElementById('editTaskModal').classList.remove('hidden')"></i>
-
-                            <!-- Delete Icon -->
-                            <i class="fas fa-trash-alt cursor-pointer text-red-500" title="Delete Task" onclick="document.getElementById('deleteTaskModal').classList.remove('hidden')"></i>
-                        </div>
-                    </li>
-                </ul>
             </div>
         </div>
     </div>
@@ -99,7 +56,7 @@
                 <div class="mb-4">
                     <label class="block mb-1 font-bold">Status</label>
                     <select id="create-project-status" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
-                        <option>Select Status</option>
+                        <option value="">Select Status</option>
                         <option value="new">New</option>
                         <option value="in_progress">Processing</option>
                         <option value="completed">Done</option>
@@ -115,24 +72,7 @@
         </div>
     </div>
 
-    <!-- Edit Project Modal -->
-    <div id="editProjectModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
-        <div class="bg-white p-6 rounded-md shadow-md w-full max-w-md">
-            <h2 class="text-xl font-bold mb-4">Edit Project</h2>
-            <form>
-                <div class="mb-4">
-                    <label class="block mb-1 font-bold">Project Name</label>
-                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200" value="Existing Project Name">
-                </div>
-                <div class="flex justify-end">
-                    <button type="button" class="bg-red-500 text-white px-4 py-2 rounded-md shadow mr-2" onclick="document.getElementById('editProjectModal').classList.add('hidden')">
-                        Cancel
-                    </button>
-                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow">Update</button>
-                </div>
-            </form>
-        </div>
-    </div>
+
 
     <!-- Create Task Modal -->
     <div id="createTaskModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
@@ -209,6 +149,13 @@
     </div>
 
 
+    <!-- Projects and Tasks List -->
+    <div id="projects_tasks">
+        <!-- Example Project -->
+        @include('components.project_list')
+    </div>
+
+
     <!--Logout for invalid session id -->
     <form id="logout-form" action="{{route('logout')}}" method="POST" style="display: none;">
         @csrf
@@ -264,6 +211,18 @@
 
                         document.getElementById('createProjectModal').classList.add('hidden');
                         document.getElementById('project-form').reset();
+
+                        //Updating the project list
+                        fetch('{{ route("showprojects") }}?search=', {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => response.text())
+                            .then(data => {
+                                document.getElementById('project-list').innerHTML = data;
+                                console.log(data);
+                            });
                     }
                 })
                 .catch(error => {
@@ -271,6 +230,137 @@
                     alert('Something went wrong. Please try again.');
                     console.error('Error:', error); // Log the error for debugging
                 });
+        }
+
+        function search() {
+            console.log("Search Called");
+            document.getElementById('search').addEventListener('input', function() {
+                let query = this.value;
+                fetch('{{ route("showprojects") }}?search=' + query, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('project-list').innerHTML = data;
+                        // console.log(data);
+                    });
+            });
+        }
+
+        function project_delete(button) {
+            const projectId = button.getAttribute('data-project-id');
+            if (!confirm("Are you sure you want to delete this project?" + projectId)) {
+
+                return;
+            }
+
+            fetch(`/deleteProject`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Project-ID': projectId
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the project from the DOM
+                        document.getElementById(`${projectId}`).remove();
+                    } else {
+                        alert('Failed to delete the project.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function project_update(button) {
+
+            let projectId = button.getAttribute('data-project-id-edit');
+            // let formData = new FormData(document.getElementById('update-project-form').value);
+            let name = document.getElementById('edit-project-name').value;
+            let description = document.getElementById('edit-project-description').value;
+            let status = document.getElementById('edit-project-status').value;
+
+            console.log(description, status, name);
+            fetch(`/updateProject/${projectId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ // Stringify the body
+                        'name': name,
+                        'description': description,
+                        'status': status
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const successMessage = document.getElementById('success-message');
+                    if (data.success) {
+                        successMessage.innerText = 'Project updated successfully!';
+                        // successMessage.classList.replace('bg-green-100', 'bg-gray-100');
+                        successMessage.classList.remove('hidden');
+                        console.log("Works");
+
+                        //Updating project lists
+                        fetch('{{ route("showprojects") }}?search=', {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => response.text())
+                            .then(data => {
+                                document.getElementById('project-list').innerHTML = data;
+                                // console.log(data);
+                            });
+
+
+                        setTimeout(() => {
+                            successMessage.classList.add('hidden');
+                            // successMessage.classList.replace('bg-green-100', 'bg-red-100');
+                        }, 3000);
+                    } else {
+                        const successMessage = document.getElementById('success-message');
+                        successMessage.innerText = 'Project Update Failed';
+                        successMessage.classList.replace('bg-green-100', 'bg-orange-100');
+                        successMessage.classList.replace('text-blue-700', 'text-red-800');
+                        successMessage.classList.remove('hidden');
+
+                        console.log("Didn't Work");
+                        // Hide the message after 3 seconds
+                        setTimeout(() => {
+                            successMessage.classList.add('hidden');
+                            successMessage.classList.replace('bg-orange-100', 'bg-green-100');
+                            successMessage.classList.replace('text-red-800', 'text-blue-700');
+                        }, 3000);
+                    }
+
+
+                    //Hide the edit card
+                    let editcard = document.getElementById(`editProjectModal${projectId}`);
+                    editcard.classList.add('hidden');
+                    console.log("found Edit Card");
+
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const successMessage = document.getElementById('success-message');
+                    successMessage.innerHTML = '<p class="flex bg-red-600 py-3 text-white hidden">An Error Occured!!</p>';
+                    successMessage.classList.remove('hidden');
+
+                    // Hide the message after 3 seconds
+                    setTimeout(() => {
+                        successMessage.classList.add('hidden');
+                    }, 3000);
+                });
+
         }
     </script>
 </body>

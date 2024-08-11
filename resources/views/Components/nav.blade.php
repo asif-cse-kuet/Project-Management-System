@@ -1,6 +1,6 @@
 <section>
     <nav class="bg-blue-600 p-4">
-        <div class="container mx-auto flex justify-between items-center">
+        <div class="container mx-auto w-[90%] flex justify-between items-center">
             <div class="text-white text-lg font-bold">Project Management Dashboard<br>
                 <p class="text-[12px] text-yellow-200">{{$userMode}}</p>
             </div>
