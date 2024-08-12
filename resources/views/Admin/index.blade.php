@@ -8,11 +8,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     @vite('resources/css/app.css')
+    <!-- Load jQuery from CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body class="bg-gray-100">
 
-    @if(session()->has('user'))
+
+    @if(Auth::check())
 
     <!-- Navbar -->
     <x-nav userMode="Admin Mode" />
@@ -79,28 +82,43 @@
         <div class="bg-white p-6 rounded-md shadow-md w-full max-w-md">
             <h2 class="text-xl font-bold mb-4">Create New Task</h2>
             <form>
+
                 <div class="mb-4">
                     <label class="block mb-1 font-bold">Task Name</label>
                     <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
                 </div>
+
+                <div class="mb-4">
+                    <label class="block mb-1 font-bold">Task Description</label>
+                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
+                </div>
+
                 <div class="mb-4">
                     <label class="block mb-1 font-bold">Status</label>
                     <select class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
-                        <option>Select Status</option>
-                        <option>New</option>
-                        <option>Processing</option>
-                        <option>Done</option>
+                        <option value="new">Select Status</option>
+                        <option value="new">New</option>
+                        <option value="Pending">Processing</option>
+                        <option value="completed">Done</option>
                     </select>
                 </div>
+
+                <!-- User Assigned To -->
                 <div class="mb-4">
-                    <label class="block mb-1 font-bold">Assign to User</label>
-                    <select class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
-                        <option>Select User</option>
-                        <option>User A</option>
-                        <option>User B</option>
-                        <option>User C</option>
-                    </select>
+                    <div class="mb-4">
+                        <label for="user-search" class="block mb-1 font-bold">Assign to (Type name and select from suggestion)</label>
+                        <input type="text" id="user-search" autocomplete="off" placeholder="Type a user name and select from suggestions..." class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200" onclick="initiateSearch()">
+                        <input type="hidden" id="user-id">
+                        <div id="user-list" style="display:none;">
+                            <ul id="user-suggestions"></ul>
+                        </div>
+                    </div>
                 </div>
+
+
+
+
+
                 <div class="flex justify-end">
                     <button type="button" class="bg-red-500 text-white px-4 py-2 rounded-md shadow mr-2" onclick="document.getElementById('createTaskModal').classList.add('hidden')">
                         Cancel
@@ -232,6 +250,7 @@
                 });
         }
 
+
         function search() {
             console.log("Search Called");
             document.getElementById('search').addEventListener('input', function() {
@@ -248,6 +267,8 @@
                     });
             });
         }
+
+
 
         function project_delete(button) {
             const projectId = button.getAttribute('data-project-id');
@@ -277,6 +298,8 @@
                     console.error('Error:', error);
                 });
         }
+
+
 
         function project_update(button) {
 
@@ -361,6 +384,56 @@
                     }, 3000);
                 });
 
+        }
+
+
+        function initiateSearch() {
+            $(document).ready(function() {
+                $('#user-search').on('input', function() {
+                    let query = $(this).val();
+
+                    if (query.length > 0) {
+                        $.ajax({
+                            url: "{{ route('search-users') }}",
+                            type: "GET",
+                            data: {
+                                search: query
+                            },
+                            success: function(data) {
+                                $('#user-suggestions').empty();
+
+                                if (data.length > 0) {
+                                    $('#user-list').show();
+                                    let count = 0; // Initialize a counter
+
+                                    $.each(data, function(key, user) {
+                                        if (count < 3) { // Check if the counter is less than 3
+                                            $('#user-suggestions').append('<li class="w-[50%] m-2 px-4 py-2 border border-gray-300 bg-orange-100 rounded-md shadow-sm focus:ring focus:ring-blue-200" data-user-id="' + user.id + '">' + user.fname + '</li>');
+                                            count++;
+                                        } else {
+                                            return false; // Break the loop once 3 users have been processed
+                                        }
+                                    });
+
+                                    $('#user-suggestions li').on('click', function() {
+                                        let selectedName = $(this).text();
+                                        let selectedId = $(this).data('user-id');
+
+                                        $('#user-search').val(selectedName);
+                                        $('#user-id').val(selectedId);
+                                        console.log(selectedName, selectedId);
+                                        $('#user-list').hide();
+                                    });
+                                } else {
+                                    $('#user-list').hide();
+                                }
+                            }
+                        });
+                    } else {
+                        $('#user-list').hide();
+                    }
+                });
+            });
         }
     </script>
 </body>

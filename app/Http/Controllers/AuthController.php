@@ -11,6 +11,21 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    public function search_user(Request $request)
+    {
+        $search = $request->input('search');
+
+        if ($search) {
+            $users = User::where('fname', 'like', '%' . $search . '%')
+                ->orWhere('lname', 'like', '%' . $search . '%')
+                ->get();
+        } else {
+            $users = collect(); // Return an empty collection if no search query
+        }
+
+        return response()->json($users);
+    }
+
     public function showRegistrationForm()
     {
         return view('layout.index');

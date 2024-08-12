@@ -35,8 +35,11 @@ class ProjectController extends Controller
             return view('components.project_list', compact('projects'))->render();
         }
 
-        // return view('components.project_list', compact('projects'))->render();
-        return view('admin.index', compact('projects'));
+        if (Auth::user()->role === 'admin') {
+            return view('admin.index', compact('projects'));
+        } else {
+            return view('user.index', compact('projects'));
+        }
     }
 
 
@@ -59,6 +62,7 @@ class ProjectController extends Controller
             'user_id' => Auth::user()->id, // Admin who created the project
             'status' => $request->status,
         ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Project created successfully!',
@@ -66,6 +70,7 @@ class ProjectController extends Controller
             // 'user' => Auth::user()
         ]);
     }
+
     /**
      * Display the specified resource.
      */

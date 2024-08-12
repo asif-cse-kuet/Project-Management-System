@@ -5,7 +5,7 @@
                 <p class="text-[12px] text-yellow-200">{{$userMode}}</p>
             </div>
             <div class="flex items-center">
-                <span class="text-white mr-4">{{session('user')->fname}}</span> <!-- Placeholder for username -->
+                <span class="text-white mr-4">{{ Auth::user()->fname }}</span> <!-- Placeholder for username -->
                 <button class="bg-blue-800 text-white px-4 py-2 rounded-md" onclick="{{route('logout')}}" id="logoutButton">Logout</button>
             </div>
         </div>

@@ -3,20 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\User;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tasks = Task::where('user_id', auth()->id())->get();
-        return view('tasks.index', compact('tasks'));
+        $search = $request->input('search');
+        $userName = Auth::user()->name;
+        // $userId = "2";
+
+        if ($search) {
+            $users = User::where('fname', 'like', '%' . $search . '%')
+                ->latest()->get();
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No user found',
+            ]);
+        }
+
+        return view('components.user', compact('users'));
     }
 
     public function create()
     {
-        $projects = Project::where('user_id', auth()->id())->get();
+        $projects = Project::where('user_id', auth()->id)->get();
         return view('tasks.create', compact('projects'));
     }
 
@@ -24,18 +39,22 @@ class TaskController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
             'project_id' => 'required|exists:projects,id',
+            'status' => 'required|string|max:255',
         ]);
 
         Task::create([
             'title' => $request->title,
             'description' => $request->description,
             'project_id' => $request->project_id,
-            'status' => $request->status ?? 'pending',
+            'status' => $request->status,
+            'user_id' => $request->user_id,
         ]);
 
-        return redirect()->route('tasks.index')->with('success', 'Task created successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Project created successfully!',
+        ]);
     }
 
     public function edit(Task $task)
@@ -63,7 +82,6 @@ class TaskController extends Controller
     public function destroy(Task $task)
     {
         $task->delete();
-
         return redirect()->route('tasks.index')->with('success', 'Task deleted successfully.');
     }
 }
