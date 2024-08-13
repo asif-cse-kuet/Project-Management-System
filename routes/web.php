@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
-use App\Models\Task;
 
 Route::get('/', function () {
     return view('layout.index');
@@ -18,6 +17,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/showprojects', [ProjectController::class, 'index'])->name('showprojects');
+Route::get('/userDetails', [AuthController::class, 'finduser'])->name('userDetails');
 
 Route::middleware('auth')->group(function () {
     Route::get('AdminDashboard', [ProjectController::class, 'index'])->name('AdminDashboard');
@@ -25,11 +25,9 @@ Route::middleware('auth')->group(function () {
         return view('user.index');
     });
 
-    // Route::get('/search-users', [TaskController::class, 'index'])->name('search-users');
-
     Route::get('/search-users', [AuthController::class, 'search_user'])->name('search-users');
 
-    Route::post('/taskCreate', [Task::class, 'store']);
+    Route::post('/taskCreate', [TaskController::class, 'store'])->name('taskCreate');
 
     Route::post('/project', [ProjectController::class, 'store'])->name('projects.store');
     Route::put('/updateProject/{id}', [ProjectController::class, 'update'])->name('projects.update');

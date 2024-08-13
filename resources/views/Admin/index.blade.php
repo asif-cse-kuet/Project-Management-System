@@ -81,21 +81,22 @@
     <div id="createTaskModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
         <div class="bg-white p-6 rounded-md shadow-md w-full max-w-md">
             <h2 class="text-xl font-bold mb-4">Create New Task</h2>
-            <form>
-
+            <form id="task-create-form" onsubmit="create_task()">
+                @csrf
+                <input type="hidden" id="task-project-id">
                 <div class="mb-4">
                     <label class="block mb-1 font-bold">Task Name</label>
-                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
+                    <input id="task-title" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
                 </div>
 
                 <div class="mb-4">
                     <label class="block mb-1 font-bold">Task Description</label>
-                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
+                    <input id="task-description" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
                 </div>
 
                 <div class="mb-4">
                     <label class="block mb-1 font-bold">Status</label>
-                    <select class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
+                    <select id="task-status" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
                         <option value="new">Select Status</option>
                         <option value="new">New</option>
                         <option value="Pending">Processing</option>
@@ -116,9 +117,6 @@
                 </div>
 
 
-
-
-
                 <div class="flex justify-end">
                     <button type="button" class="bg-red-500 text-white px-4 py-2 rounded-md shadow mr-2" onclick="document.getElementById('createTaskModal').classList.add('hidden')">
                         Cancel
@@ -136,7 +134,7 @@
             <form>
                 <div class="mb-4">
                     <label class="block mb-1 font-bold">Task Name</label>
-                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200" value="Existing Task Name">
+                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200" value="Task Name">
                 </div>
                 <div class="mb-4">
                     <label class="block mb-1 font-bold">Status</label>
@@ -239,7 +237,7 @@
                             .then(response => response.text())
                             .then(data => {
                                 document.getElementById('project-list').innerHTML = data;
-                                console.log(data);
+                                // console.log(data);
                             });
                     }
                 })
@@ -309,7 +307,7 @@
             let description = document.getElementById('edit-project-description').value;
             let status = document.getElementById('edit-project-status').value;
 
-            console.log(description, status, name);
+            // console.log(description, status, name);
             fetch(`/updateProject/${projectId}`, {
                     method: 'PUT',
                     headers: {
@@ -330,7 +328,7 @@
                         successMessage.innerText = 'Project updated successfully!';
                         // successMessage.classList.replace('bg-green-100', 'bg-gray-100');
                         successMessage.classList.remove('hidden');
-                        console.log("Works");
+                        // console.log("Update Project Works!!");
 
                         //Updating project lists
                         fetch('{{ route("showprojects") }}?search=', {
@@ -356,7 +354,7 @@
                         successMessage.classList.replace('text-blue-700', 'text-red-800');
                         successMessage.classList.remove('hidden');
 
-                        console.log("Didn't Work");
+                        // console.log("Update Project Didn't work");
                         // Hide the message after 3 seconds
                         setTimeout(() => {
                             successMessage.classList.add('hidden');
@@ -369,7 +367,7 @@
                     //Hide the edit card
                     let editcard = document.getElementById(`editProjectModal${projectId}`);
                     editcard.classList.add('hidden');
-                    console.log("found Edit Card");
+                    // console.log("found Edit Card");
 
                 })
                 .catch(error => {
@@ -421,7 +419,7 @@
 
                                         $('#user-search').val(selectedName);
                                         $('#user-id').val(selectedId);
-                                        console.log(selectedName, selectedId);
+                                        // console.log(selectedName, selectedId);
                                         $('#user-list').hide();
                                     });
                                 } else {
@@ -434,6 +432,100 @@
                     }
                 });
             });
+        }
+
+        function create_task() {
+            var title = document.getElementById('task-title').value;
+            var description = document.getElementById('task-description').value;
+            var status = document.getElementById('task-status').value;
+            var user_id = document.getElementById('user-id').value;
+            var project_id = document.getElementById('task-project-id').value;
+
+            // console.log(title, description, status, user_id, project_id);
+
+            event.preventDefault();
+            fetch('{{ route("taskCreate") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        description: description,
+                        status: status,
+                        user_id: user_id,
+                        project_id: project_id
+                    })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        // Handle non-200 responses
+                        return response.json().then(errorData => {
+                            throw new Error('Server Error');
+                        });
+                    }
+                })
+                .then(data => {
+                    // console.log(data);
+                    if (data.success) {
+                        const successMessage = document.getElementById('success-message');
+                        successMessage.textContent = data.message;
+                        successMessage.classList.remove('hidden');
+
+                        // Hide the message after 3 seconds
+                        setTimeout(() => {
+                            successMessage.classList.add('hidden');
+                        }, 3000);
+
+                        document.getElementById('createTaskModal').classList.add('hidden');
+                        document.getElementById('task-create-form').reset();
+
+                        //Updating the project list
+                        fetch('{{ route("showprojects") }}?search=', {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => response.text())
+                            .then(data => {
+                                document.getElementById('project-list').innerHTML = data;
+                            });
+                    }
+                })
+                .catch(error => {
+                    // Handle the error
+                    alert('Something went wrong. Please try again.');
+                    console.error('Error:', error); // Log the error for debugging
+                });
+        }
+
+
+        function userName(uid) {
+            console.log('userName function called');
+            console.log(uid);
+            if (uid) {
+                fetch(`/userDetails?user_id=${uid}`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.fname) {
+                            document.getElementById(uid).textContent = data.fname;
+                        } else if (data.error) {
+                            // console.error('Error:', data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Request failed:', error);
+                    });
+            }
         }
     </script>
 </body>

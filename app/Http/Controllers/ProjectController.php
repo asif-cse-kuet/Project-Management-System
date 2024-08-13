@@ -21,12 +21,11 @@ class ProjectController extends Controller
         if ($search) {
             $projects = Project::where('user_id', $userId)
                 ->where('name', 'like', '%' . $search . '%')
-                ->with('tasks')  // Eager load tasks
-                //->where('name', 'like', '%' . $search . '%')
+                ->with(['tasks.users'])  // Eager load tasks
                 ->latest()->get();
         } else {
             $projects = Project::where('user_id', $userId)
-                ->with('tasks')  // Eager load tasks
+                ->with(['tasks.users'])  // Eager load tasks
                 ->latest()->get();
         }
 

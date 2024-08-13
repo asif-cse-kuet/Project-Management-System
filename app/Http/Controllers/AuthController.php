@@ -11,6 +11,30 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    public function finduser(Request $request)
+    {
+        $userId = (int) $request->input('user_id');
+
+        // Validate the user_id
+        $validator = Validator::make(['user_id' => $userId], [
+            'user_id' => 'required|integer|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => 'Invalid user ID.'], 400);
+        }
+
+        // Retrieve the user's first name
+        $user = User::find($userId);
+
+        if ($user) {
+            return response()->json(['fname' => $user->fname]);
+        } else {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+    }
+
+
     public function search_user(Request $request)
     {
         $search = $request->input('search');

@@ -14,7 +14,6 @@ class TaskController extends Controller
     {
         $search = $request->input('search');
         $userName = Auth::user()->name;
-        // $userId = "2";
 
         if ($search) {
             $users = User::where('fname', 'like', '%' . $search . '%')
@@ -29,31 +28,27 @@ class TaskController extends Controller
         return view('components.user', compact('users'));
     }
 
-    public function create()
-    {
-        $projects = Project::where('user_id', auth()->id)->get();
-        return view('tasks.create', compact('projects'));
-    }
-
     public function store(Request $request)
     {
+        $p_id = intval($request->project_id);
+        $u_id = intval($request->user_id);
         $request->validate([
             'title' => 'required|string|max:255',
-            'project_id' => 'required|exists:projects,id',
+            'project_id' => 'required',
             'status' => 'required|string|max:255',
         ]);
 
         Task::create([
             'title' => $request->title,
             'description' => $request->description,
-            'project_id' => $request->project_id,
+            'project_id' => $p_id,
             'status' => $request->status,
-            'user_id' => $request->user_id,
+            'user_id' => $u_id,
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Project created successfully!',
+            'message' => 'Task created successfully!',
         ]);
     }
 

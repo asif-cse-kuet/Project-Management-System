@@ -1,34 +1,9 @@
-<!-- These comments are the logic how this page is implemented -->
-<!-- @if ($projects->isEmpty())
-<p>No projects found.</p>
-@else
-<ul>
-    @foreach ($projects as $project)
-    <li>
-        <strong>{{ $project->name }}</strong>
-
-        @if ($project->tasks->isEmpty())
-        <p>No tasks found for this project.</p>
-        @else
-        <ul>
-            @foreach ($project->tasks as $task)
-            <li>{{ $task->name }} - {{ $task->status }}</li>
-            @endforeach
-        </ul>
-        @endif
-    </li>
-    @endforeach
-</ul>
-@endif -->
-
-
 @if ($projects->isEmpty())
 <p>No projects found.</p>
 @else
 @foreach ($projects as $project)
 <div id="project-list">
     <div id="{{$project->id}}" class="bg-white p-4 rounded-md shadow mb-4 mx-10">
-
 
         <div class="flex justify-between items-center">
             <div class="text-xl font-bold">{{ $project->name }}</div>
@@ -41,10 +16,7 @@
 
                 <button class="bg-red-500 text-white px-2 py-1 mr-2 rounded-md" data-project-id="{{ $project->id }}" onclick="project_delete(this)">Delete</button>
 
-                <!-- <button class="bg-red-500 text-white px-2 py-1 mr-2 rounded-md" onclick="project_delete({{ $project->id }})">Delete</button> -->
-
             </div>
-
         </div>
 
         <div class="mt-2 mb-2">
@@ -56,16 +28,26 @@
         </div>
 
         <div class="mt-4">
-            <button class="bg-green-500 text-white px-4 py-2 rounded-md shadow" onclick="document.getElementById('createTaskModal').classList.remove('hidden')">
+            <button class="bg-green-500 text-white px-4 py-2 rounded-md shadow" onclick="document.getElementById('createTaskModal').classList.remove('hidden'); document.getElementById('task-project-id').value='{{$project->id}}'">
                 Create Task
             </button>
             @if ($project->tasks->isEmpty())
             <p>No tasks found for this project.</p>
             @else
             @foreach ($project->tasks as $task)
-            <ul class="list-disc pl-5 mt-4">
-                <li class="mb-2 flex justify-left items-center max-w-4/5 w-4/5">
-                    <span>{{ $task->name }}</span>
+            <ul class="pl-1 my-4">
+                <li class="mb-3 flex items-center max-w-4/5 w-4/5">
+                    <div class="grid grid-row bg-gray-50 text-blue-900 py-2 px-1 rounded-md">
+                        <div class="bg-lime-200 p-1 w-full text-blue-900 font-semibold rounded-md">{{ $task->title }}</div>
+                        <div>{{ $task->description }}</div>
+                        <div>{{ $project->id }}</div>
+                        <div class="bg-gray-200 p-1 text-blue-900 font-semibold rounded-md">
+                            <p id="{{ $task->user_id }}">
+                                {{$task->users->fname}}
+                            </p>
+                        </div>
+                    </div>
+
                     <div class="flex items-center space-x-2">
                         <!-- Status Icon -->
                         <p class="bg-gray-200 text-blue-900 px-2 py-0 rounded-md ml-4 mr-2">{{ $task->status }}</p>
