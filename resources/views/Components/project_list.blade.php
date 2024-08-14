@@ -37,13 +37,13 @@
             @foreach ($project->tasks as $task)
             <ul class="pl-1 my-4">
                 <li class="mb-3 flex items-center max-w-4/5 w-4/5">
-                    <div class="grid grid-row bg-gray-50 text-blue-900 py-2 px-1 rounded-md">
+                    <div class="grid grid-row bg-gray-50 text-blue-900 py-2 px-1 w-full rounded-md">
                         <div class="bg-lime-200 p-1 w-full text-blue-900 font-semibold rounded-md">{{ $task->title }}</div>
-                        <div>{{ $task->description }}</div>
-                        <div>{{ $project->id }}</div>
-                        <div class="bg-gray-200 p-1 text-blue-900 font-semibold rounded-md">
-                            <p id="{{ $task->user_id }}">
-                                {{$task->users->fname}}
+                        <div class="w-full px-5 py-3 text-justify">{{ $task->description }}</div>
+                        <div class="inline-block p-3 font-semibold rounded-md">
+                            Assigned To:
+                            <p id="{{ $task->user_id }}" class="bg-white px-1 text-blue-500 text-center text-xs inline-block rounded-xl min-w-12 max-w-fit">
+                                {{ strtoupper($task->users->fname)}}
                             </p>
                         </div>
                     </div>
