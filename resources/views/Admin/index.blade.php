@@ -490,6 +490,87 @@
                     });
             }
         }
+
+        function taskUserSearch() {
+            $(document).ready(function() {
+                $('#edit-user-search').on('input', function() {
+                    let query = $(this).val();
+
+                    if (query.length > 0) {
+                        $.ajax({
+                            url: "{{ route('search-users') }}",
+                            type: "GET",
+                            data: {
+                                search: query
+                            },
+                            success: function(data) {
+                                $('#edit-user-suggestions').empty();
+
+                                if (data.length > 0) {
+                                    $('#edit-user-list').show();
+                                    let count = 0; // Initialize a counter
+
+                                    $.each(data, function(key, user) {
+                                        if (count < 3) { // Check if the counter is less than 3
+                                            $('#edit-user-suggestions').append('<li class="w-[50%] m-2 px-4 py-2 border border-gray-300 bg-orange-100 rounded-md shadow-sm focus:ring focus:ring-blue-200" data-user-id="' + user.id + '">' + user.fname + '</li>');
+                                            count++;
+                                        } else {
+                                            return false; // Break the loop once 3 users have been processed
+                                        }
+                                    });
+
+                                    $('#edit-user-suggestions li').on('click', function() {
+                                        let selectedName = $(this).text();
+                                        let selectedId = $(this).data('edit-user-id');
+
+                                        $('#edit-user-search').val(selectedName);
+                                        $('#edit-user-id').val(selectedId);
+                                        // console.log(selectedName, selectedId);
+                                        $('#edit-user-list').hide();
+                                    });
+                                } else {
+                                    $('#edit-user-list').hide();
+                                }
+                            }
+                        });
+                    } else {
+                        $('#edit-user-list').hide();
+                    }
+                });
+            });
+        }
+
+        function editTask($taskid) {
+            let task = JSON.parse(document.getElementById($taskid).value);
+
+            //Debugging
+            // console.log(typeof(task));
+            // console.log(task.users.fname);
+            // console.log(task.title);
+
+            let user_id = task.user_id;
+            let project_id = task.project_id;
+
+            //Fetching the task edit ids that should be updated
+            let edit_task = document.getElementById('editTaskModal');
+            let task_title = document.getElementById('edit-task-title');
+            let task_description = document.getElementById('edit-task-description');
+            let task_status = document.getElementById('edit-task-status');
+            let task_user = document.getElementById('edit-task-user');
+
+            //Setting values to the edit task fields
+            // task_title.innerText = task.title;
+            // task_description.innerText = task.description;
+            // task_status.selectedId = 'selected';
+            // task_user.innerText = task.user;
+
+            //Showing the Edit Task Card
+            edit_task.classList.add('edit-task-card');
+            console.log(typeof(user_id), typeof(project_id), typeof(task.title));
+
+            edit_task.classList.remove('hidden');
+
+        }
     </script>
 </body>
 
