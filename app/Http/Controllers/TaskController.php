@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class TaskController extends Controller
 {
@@ -57,21 +58,39 @@ class TaskController extends Controller
         return view('tasks.edit', compact('task'));
     }
 
-    public function update(Request $request, Task $task)
+    public function update($taskid, Request $request)
     {
+        return response()->json([
+            'success' => true,
+            'message' => `$taskid`,
+        ]);
+        $userId = intval($request->user_id);
+        $projectId = intval($request->project_id);
+        $status = ($request->status);
+        $description = ($request->description);
+        $title = ($request->title);
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|in:pending,in_progress,completed',
+            'project_id' => 'required',
         ]);
 
-        $task->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'status' => $request->status,
+        $findTask = Task::find($taskid);
+
+        $findTask->update([
+            'title' => $title,
+            'description' => $description,
+            'status' => $status,
+            'project_id' => $projectId,
+            'user_id' => $userId
         ]);
 
-        return redirect()->route('tasks.index')->with('success', 'Task updated successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Task updated successfully!',
+        ]);
     }
 
     public function destroy(Task $task)

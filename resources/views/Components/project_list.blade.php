@@ -58,7 +58,7 @@
 
                         <!-- Edit Icon -->
                         <input type="hidden" id="{{$task->id}}" value='@json($task)'>
-                        <i class="fas fa-edit ml-4 cursor-pointer text-yellow-500" title="Edit Task" onclick='editTask("{{$task->id}}")'></i>
+                        <i class="fas fa-edit ml-4 cursor-pointer text-yellow-500" title="Edit Task" onclick='document.getElementById("editTaskModal").classList.remove(`hidden`)'></i>
 
                         <!-- Delete Icon -->
                         <i class="fas fa-trash-alt cursor-pointer text-red-500" title="Delete Task" onclick="document.getElementById('deleteTaskModal').classList.remove('hidden')"></i>

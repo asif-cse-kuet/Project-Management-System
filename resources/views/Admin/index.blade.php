@@ -512,7 +512,7 @@
 
                                     $.each(data, function(key, user) {
                                         if (count < 3) { // Check if the counter is less than 3
-                                            $('#edit-user-suggestions').append('<li class="w-[50%] m-2 px-4 py-2 border border-gray-300 bg-orange-100 rounded-md shadow-sm focus:ring focus:ring-blue-200" data-user-id="' + user.id + '">' + user.fname + '</li>');
+                                            $('#edit-user-suggestions').append('<li class="w-[50%] m-2 px-4 py-2 border border-gray-300 bg-orange-100 rounded-md shadow-sm focus:ring focus:ring-blue-200" data-user-id=' + user.id + '>' + user.fname + '</li>');
                                             count++;
                                         } else {
                                             return false; // Break the loop once 3 users have been processed
@@ -521,9 +521,14 @@
 
                                     $('#edit-user-suggestions li').on('click', function() {
                                         let selectedName = $(this).text();
-                                        let selectedId = $(this).data('edit-user-id');
-
+                                        let selectedId = $(this).data(
+                                            'userId');
+                                        console.log($(this));
                                         $('#edit-user-search').val(selectedName);
+                                        $('#edit-user-search').attr('user_att', selectedId);
+                                        console.log(selectedId);
+                                        console.log(selectedName);
+                                        // console.log($('#edit-user-search'));
                                         $('#edit-user-id').val(selectedId);
                                         // console.log(selectedName, selectedId);
                                         $('#edit-user-list').hide();
@@ -540,7 +545,9 @@
             });
         }
 
-        function editTask($taskid) {
+        function editTask(event, $taskid) {
+            console.log($taskid);
+            event.preventDefault();
             let task = JSON.parse(document.getElementById($taskid).value);
 
             //Debugging
@@ -548,28 +555,104 @@
             // console.log(task.users.fname);
             // console.log(task.title);
 
-            let user_id = task.user_id;
+            let usr_id = task.user_id;
             let project_id = task.project_id;
 
             //Fetching the task edit ids that should be updated
             let edit_task = document.getElementById('editTaskModal');
-            let task_title = document.getElementById('edit-task-title');
-            let task_description = document.getElementById('edit-task-description');
-            let task_status = document.getElementById('edit-task-status');
-            let task_user = document.getElementById('edit-task-user');
+            let task_title = document.getElementById('edit-task-title').value;
+            let task_description = document.getElementById('edit-task-description').value;
+            let task_status = document.getElementById('edit-task-status').value;
+            let task_user = document.getElementById('edit-user-search').getAttribute('user_att');
 
-            //Setting values to the edit task fields
-            // task_title.innerText = task.title;
-            // task_description.innerText = task.description;
-            // task_status.selectedId = 'selected';
-            // task_user.innerText = task.user;
+            console.log(task_user);
+            console.log($taskid);
+            console.log(project_id);
 
-            //Showing the Edit Task Card
-            edit_task.classList.add('edit-task-card');
-            console.log(typeof(user_id), typeof(project_id), typeof(task.title));
+            //Debugging
+            // edit_task.classList.add('edit-task-card');
+            // console.log(typeof(user_id), typeof(project_id), typeof(task.title));
+            // console.log(task_title, task_description, task_status, task_user);
 
-            edit_task.classList.remove('hidden');
+            //Updating the Edit Task 
 
+            fetch(`/taskUpdate/${$taskid}`, {
+                    method: 'PUT',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ // Stringify the body
+                        'title': task_title,
+                        'description': task_description,
+                        'status': task_status,
+                        'user_id': task_user,
+                        'project_id': project_id
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                    const successMessage = document.getElementById('success-message');
+                    if (data.success) {
+                        console.log("success message");
+                        successMessage.innerText = 'Task updated successfully!';
+                        // successMessage.classList.replace('bg-green-100', 'bg-gray-100');
+                        successMessage.classList.remove('hidden');
+                        // console.log("Update Project Works!!");
+
+                        //Updating project lists
+                        fetch('{{ route("showprojects") }}?search=', {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => response.text())
+                            .then(data => {
+                                document.getElementById('project-list').innerHTML = data;
+                                // console.log(data);
+                            });
+
+
+                        setTimeout(() => {
+                            successMessage.classList.add('hidden');
+                            // successMessage.classList.replace('bg-green-100', 'bg-red-100');
+                        }, 3000);
+                    } else {
+                        const successMessage = document.getElementById('success-message');
+                        successMessage.innerText = 'Task Update Failed';
+                        successMessage.classList.replace('bg-green-100', 'bg-orange-100');
+                        successMessage.classList.replace('text-blue-700', 'text-red-800');
+                        successMessage.classList.remove('hidden');
+
+                        // console.log("Update Project Didn't work");
+                        // Hide the message after 3 seconds
+                        setTimeout(() => {
+                            successMessage.classList.add('hidden');
+                            successMessage.classList.replace('bg-orange-100', 'bg-green-100');
+                            successMessage.classList.replace('text-red-800', 'text-blue-700');
+                        }, 3000);
+                    }
+
+
+                    //Hide the edit card
+                    let editcard = document.getElementById(`editTaskModal`);
+                    editcard.classList.add('hidden');
+                    // console.log("found Edit Card");
+
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const successMessage = document.getElementById('success-message');
+                    successMessage.innerHTML = '<p class="flex bg-red-600 py-3 text-white hidden">An Error Occured!!</p>';
+                    successMessage.classList.remove('hidden');
+
+                    // Hide the message after 3 seconds
+                    setTimeout(() => {
+                        successMessage.classList.add('hidden');
+                    }, 3000);
+                });
         }
     </script>
 </body>
