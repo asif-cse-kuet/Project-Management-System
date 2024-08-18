@@ -1,8 +1,9 @@
 @if ($projects->isEmpty())
 <p>No projects found.</p>
 @else
-@foreach ($projects as $project)
+
 <div id="project-list">
+    @foreach ($projects as $project)
     <div id="{{$project->id}}" class="bg-white p-4 rounded-md shadow mb-4 mx-10">
 
         <div class="flex justify-between items-center">
@@ -72,6 +73,7 @@
             @endif
         </div>
     </div>
+    @endforeach
 </div>
-@endforeach
+
 @endif

@@ -60,10 +60,7 @@ class TaskController extends Controller
 
     public function update($taskid, Request $request)
     {
-        return response()->json([
-            'success' => true,
-            'message' => `$taskid`,
-        ]);
+
         $userId = intval($request->user_id);
         $projectId = intval($request->project_id);
         $status = ($request->status);
@@ -73,7 +70,7 @@ class TaskController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|in:pending,in_progress,completed',
+            'status' => 'required',
             'project_id' => 'required',
         ]);
 

@@ -13,8 +13,6 @@
 </head>
 
 <body class="bg-gray-100">
-
-
     @if(Auth::check())
 
     <!-- Navbar -->
@@ -549,12 +547,6 @@
             console.log($taskid);
             event.preventDefault();
             let task = JSON.parse(document.getElementById($taskid).value);
-
-            //Debugging
-            // console.log(typeof(task));
-            // console.log(task.users.fname);
-            // console.log(task.title);
-
             let usr_id = task.user_id;
             let project_id = task.project_id;
 
@@ -565,17 +557,7 @@
             let task_status = document.getElementById('edit-task-status').value;
             let task_user = document.getElementById('edit-user-search').getAttribute('user_att');
 
-            console.log(task_user);
-            console.log($taskid);
-            console.log(project_id);
-
-            //Debugging
-            // edit_task.classList.add('edit-task-card');
-            // console.log(typeof(user_id), typeof(project_id), typeof(task.title));
-            // console.log(task_title, task_description, task_status, task_user);
-
             //Updating the Edit Task 
-
             fetch(`/taskUpdate/${$taskid}`, {
                     method: 'PUT',
                     headers: {
@@ -593,7 +575,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data.message);
+                    console.log(data);
                     const successMessage = document.getElementById('success-message');
                     if (data.success) {
                         console.log("success message");

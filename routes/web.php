@@ -28,7 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/search-users', [AuthController::class, 'search_user'])->name('search-users');
 
     Route::post('/taskCreate', [TaskController::class, 'store'])->name('taskCreate');
-    Route::put('/taskUpdate/${taskid}', [TaskController::class, 'update'])->name('taskUpdate');
+    Route::put('/taskUpdate/{taskid}', [TaskController::class, 'update'])->name('taskUpdate');
     Route::post('/project', [ProjectController::class, 'store'])->name('projects.store');
     Route::put('/updateProject/{id}', [ProjectController::class, 'update'])->name('projects.update');
     Route::delete('/deleteProject', [ProjectController::class, 'destroy'])->name('projects.destroy');

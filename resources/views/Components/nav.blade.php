@@ -28,6 +28,5 @@
                 }
             });
         </script>
-
     </nav>
 </section>
