@@ -10,6 +10,7 @@
     @vite('resources/css/app.css')
     <!-- Load jQuery from CDN -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
 
 <body class="bg-gray-100">
@@ -79,7 +80,7 @@
     <div id="createTaskModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
         <div class="bg-white p-6 rounded-md shadow-md w-full max-w-md">
             <h2 class="text-xl font-bold mb-4">Create New Task</h2>
-            <form id="task-create-form" onsubmit="create_task()">
+            <form id="task-create-form" onsubmit="create_task(event)">
                 @csrf
                 <input type="hidden" id="task-project-id">
                 <div class="mb-4">
@@ -140,7 +141,7 @@
     @else
     <!-- If the session variable 'user' is not set, submit the logout form -->
     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-        @csrf
+        <!-- @csrf -->
     </form>
     <script type="text/javascript">
         document.getElementById('logout-form').submit();
@@ -149,7 +150,7 @@
 
 
 
-    <script type="text/javascript">
+    <!-- <script type="text/javascript">
         function createProject(event) {
             event.preventDefault();
             fetch('{{ route("projects.store") }}', {
@@ -509,7 +510,7 @@
                                     let count = 0; // Initialize a counter
 
                                     $.each(data, function(key, user) {
-                                        if (count < 3) { // Check if the counter is less than 3
+                                        if (count <script 3) { // Check if the counter is less than 3
                                             $('#edit-user-suggestions').append('<li class="w-[50%] m-2 px-4 py-2 border border-gray-300 bg-orange-100 rounded-md shadow-sm focus:ring focus:ring-blue-200" data-user-id=' + user.id + '>' + user.fname + '</li>');
                                             count++;
                                         } else {
@@ -636,7 +637,23 @@
                     }, 3000);
                 });
         }
+    </script> -->
+
+
+    <!-- Sending routes to the external js file -->
+    <script>
+        var csrfToken = "{{ csrf_token() }}";
+        var searchUsersUrl = "{{ route('search-users') }}";
+        var Projects_Store_Route = '{{ route("projects.store") }}';
+        var Show_ProjectList_Route = '{{ route("showprojects") }}?search=';
+        var Delete_Project_Route = `/deleteProject`;
+        var Task_Create_Route = '{{ route("taskCreate") }}';
+        var Projects_Update_Route = `/updateProject/`;
+        // var Projects_Store_Route = "{{ route('search-users') }}";
     </script>
+
+    <!-- Link your external JavaScript file -->
+    <script src="{{ asset('js/index.js') }}"></script>
 </body>
 
 
