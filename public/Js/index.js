@@ -259,9 +259,8 @@ function project_update(button) {
 }
 
 
-// Below Functions Have to Be updated with routes from blade file 
-
 function initiateSearch() {
+    // console.log('initiateSearch function is called');
     $(document).ready(function() {
         $('#user-search').on('input', function() {
             let query = $(this).val();
@@ -310,31 +309,7 @@ function initiateSearch() {
     });
 }
 
-
-function userName(uid) {
-    console.log('userName function called');
-    console.log(uid);
-    if (uid) {
-        fetch(`/userDetails?user_id=${uid}`, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.fname) {
-                    document.getElementById(uid).textContent = data.fname;
-                } else if (data.error) {
-                    // console.error('Error:', data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Request failed:', error);
-            });
-    }
-}
+// Below Functions Have to Be updated with routes from blade file 
 
 function taskUserSearch() {
     $(document).ready(function() {
@@ -343,7 +318,7 @@ function taskUserSearch() {
 
             if (query.length > 0) {
                 $.ajax({
-                    url: "{{ route('search-users') }}",
+                    url: searchUsersUrl,
                     type: "GET",
                     data: {
                         search: query
@@ -368,13 +343,14 @@ function taskUserSearch() {
                                 let selectedName = $(this).text();
                                 let selectedId = $(this).data(
                                     'userId');
-                                console.log($(this));
+                                console.log($(this).data(
+                                    'userId'));
                                 $('#edit-user-search').val(selectedName);
                                 $('#edit-user-search').attr('user_att', selectedId);
-                                console.log(selectedId);
-                                console.log(selectedName);
-                                // console.log($('#edit-user-search'));
                                 $('#edit-user-id').val(selectedId);
+                                // console.log(selectedId);
+                                // console.log(selectedName);
+                                // console.log($('#edit-user-search'));
                                 // console.log(selectedName, selectedId);
                                 $('#edit-user-list').hide();
                             });
@@ -405,10 +381,10 @@ function editTask(event, $taskid) {
     let task_user = document.getElementById('edit-user-search').getAttribute('user_att');
 
     //Updating the Edit Task 
-    fetch(`/taskUpdate/${$taskid}`, {
+    fetch(Task_Update_Route + $taskid, {
             method: 'PUT',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': csrfToken,
                 'X-Requested-With': 'XMLHttpRequest',
                 'Content-Type': 'application/json',
             },
@@ -432,7 +408,7 @@ function editTask(event, $taskid) {
                 // console.log("Update Project Works!!");
 
                 //Updating project lists
-                fetch('{{ route("showprojects") }}?search=', {
+                fetch(Show_ProjectList_Route, {
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest'
                         }

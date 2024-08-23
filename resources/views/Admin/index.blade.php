@@ -649,7 +649,7 @@
         var Delete_Project_Route = `/deleteProject`;
         var Task_Create_Route = '{{ route("taskCreate") }}';
         var Projects_Update_Route = `/updateProject/`;
-        // var Projects_Store_Route = "{{ route('search-users') }}";
+        var Task_Update_Route = `/taskUpdate/`;
     </script>
 
     <!-- Link your external JavaScript file -->
