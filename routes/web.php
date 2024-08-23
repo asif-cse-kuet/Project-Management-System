@@ -21,12 +21,8 @@ Route::get('/userDetails', [AuthController::class, 'finduser'])->name('userDetai
 
 Route::middleware('auth')->group(function () {
     Route::get('AdminDashboard', [ProjectController::class, 'index'])->name('AdminDashboard');
-    Route::get('UserDashboard', function () {
-        return view('user.index');
-    });
-
+    Route::get('UserDashboard', [ProjectController::class, 'index'])->name('UserDashboard');
     Route::get('/search-users', [AuthController::class, 'search_user'])->name('search-users');
-
     Route::post('/taskCreate', [TaskController::class, 'store'])->name('taskCreate');
     Route::put('/taskUpdate/{taskid}', [TaskController::class, 'update'])->name('taskUpdate');
     Route::post('/project', [ProjectController::class, 'store'])->name('projects.store');

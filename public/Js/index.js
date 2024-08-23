@@ -309,8 +309,6 @@ function initiateSearch() {
     });
 }
 
-// Below Functions Have to Be updated with routes from blade file 
-
 function taskUserSearch() {
     $(document).ready(function() {
         $('#edit-user-search').on('input', function() {

@@ -41,6 +41,32 @@ class ProjectController extends Controller
         }
     }
 
+    public function user_index(Request $request)
+    {
+        $search = $request->input('search');
+        $userId = Auth::user()->id;
+        if ($search) {
+            $projects = Project::where('user_id', $userId)
+                ->where('name', 'like', '%' . $search . '%')
+                ->with(['tasks.users'])  // Eager load tasks
+                ->latest()->get();
+        } else {
+            $projects = Project::where('user_id', $userId)
+                ->with(['tasks.users'])  // Eager load tasks
+                ->latest()->get();
+        }
+
+
+        if ($request->ajax()) {
+            return view('components.project_list', compact('projects'))->render();
+        }
+
+        if (Auth::user()->role === 'admin') {
+            return view('admin.index', compact('projects'));
+        } else {
+            return view('user.index', compact('projects'));
+        }
+    }
 
 
     /**

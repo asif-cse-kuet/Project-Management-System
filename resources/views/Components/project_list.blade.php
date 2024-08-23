@@ -1,4 +1,4 @@
-@if ($projects->isEmpty())
+@if (!isset($projects))
 <p>No projects found.</p>
 @else
 
